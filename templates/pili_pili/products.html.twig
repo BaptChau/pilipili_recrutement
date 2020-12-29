@@ -23,6 +23,7 @@
         <th>Marque</th>
         <th>Slug</th>
         <th>Date de Création</th>
+        <th>Actions</th>
     </tr>
     </thead>
     <tbody>
@@ -34,6 +35,7 @@
             <td> {{product.brandId.getName}} </td>
             <td> {{product.slug}} </td>
             <td> {{product.createdAt | date("d/m/y")}} </td>
+            <td><a class="btn btn-primary" href="{{path('update_product', {id: product.id})}}">Modifier</a></td>
 
         </tr>
     {% endfor %}
