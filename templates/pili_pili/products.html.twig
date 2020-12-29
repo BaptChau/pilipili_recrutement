@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+{% if data is empty %}
+
+    <div class="jumbotron">
+        <h1>Il n'y a pas de produits</h1>
+    </div>
+{% else %}
+
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Nom</th>
+        <th>Description</th>
+        <th>Marque</th>
+        <th>Slug</th>
+        <th>Date de Création</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for product in data %}
+        <tr>
+            <td> {{product.id}} </td>
+            <td> {{product.brandId.getName}} </td>
+            <td> {{product.name}} </td>
+            <td> {{product.description}} </td>
+            <td> {{product.slug}} </td>
+            <td> {{product.createdAt | date("d/m/y")}} </td>
+
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endif %}
+
+{% endblock %}
