@@ -1,7 +1,11 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-
+{% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{message}}
+        </div>
+    {% endfor %}
 {% if data is empty %}
 
     <div class="jumbotron">
@@ -25,9 +29,9 @@
     {% for product in data %}
         <tr>
             <td> {{product.id}} </td>
-            <td> {{product.brandId.getName}} </td>
             <td> {{product.name}} </td>
             <td> {{product.description}} </td>
+            <td> {{product.brandId.getName}} </td>
             <td> {{product.slug}} </td>
             <td> {{product.createdAt | date("d/m/y")}} </td>
 

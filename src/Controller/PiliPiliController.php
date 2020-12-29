@@ -28,21 +28,21 @@ class PiliPiliController extends AbstractController
      */
     public function index(ProductRepository $productRepository): Response
     {
-        $product = $productRepository->findBy(['enabled'=>true]);
+        $product = $productRepository->findBy(['enabled' => true]);
         return $this->render('pili_pili/index.html.twig', [
             'controller_name' => 'PiliPiliController',
-            'data'=>$product
+            'data' => $product
         ]);
     }
 
     /**
      * @Route("/products", name="index_product")
      */
-    public function products(ProductRepository $productRepository):Response
+    public function products(ProductRepository $productRepository): Response
     {
         $products = $productRepository->findAll();
 
-        return $this->render('pili_pili/products.html.twig',[
+        return $this->render('pili_pili/products.html.twig', [
             'data' => $products
         ]);
     }
@@ -50,72 +50,74 @@ class PiliPiliController extends AbstractController
     /**
      * @Route("/product/create", name="create_product")
      */
-    public function createProduct(Request $request, BrandRepository $brandRepository, EntityManagerInterface $em, ProductRepository $productRepository):Response
+    public function createProduct(Request $request, BrandRepository $brandRepository, EntityManagerInterface $em, ProductRepository $productRepository): Response
     {
         $product = new Product();
+        $slugify = new Slugify();
+
         $brand = $brandRepository->findAll();
-        $brandName = array();
-        foreach ($brand as $key => $value) {
-            array_push($brandName, $value->getName());
-        }
+
 
         $form = $this->createFormBuilder($product)
-                ->add('name',TextType::class,[
-                    'label'=>"Name",
-                    'attr'=>[
-                        'class'=>'form-control'
-                        ]
-                ])
-                ->add('description',TextareaType::class,[
-                    'label'=>'Description',
-                    'attr'=>[
-                        'class'=>'form-control'
-                        ]
-                ])
-                ->add('brand_id',ChoiceType::class,[
-                    'choices'=>$brand,
-                    'choice_label'=> function (?Brand $bra){
-                        return $bra ? $bra->getName() : '';
-                    },
-                    'label'=>'Brand',
-                    'attr'=>[
-                        'class'=>'form-control'
-                        ]
-                ])
-                ->add('price',NumberType::class,[
-                    'label'=>'Price',
-                    'attr'=>[
-                        'class'=>'form-control'
-                    ]
-                ])
-                ->add('save',SubmitType::class,[
-                    'label'=>'Save',
-                    'attr'=>[
-                        'class'=>'btn btn-primary'
-                        ]
-                ])
-                ->getForm();
+            ->add('name', TextType::class, [
+                'label' => "Name",
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('description', TextareaType::class, [
+                'label' => 'Description',
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('brand_id', ChoiceType::class, [
+                'choices' => $brand,
+                'choice_label' => function (?Brand $bra) {
+                    return $bra ? $bra->getName() : '';
+                },
+                'label' => 'Brand',
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('price', NumberType::class, [
+                'label' => 'Price',
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => [
+                    'class' => 'btn btn-primary'
+                ]
+            ])
+            ->getForm();
 
-                $form->handleRequest($request);
-                if($form->isSubmitted() && $form->isValid())
-                {
-                    $product = $form->getData();
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $product = $form->getData();
 
-                $id = $product->getId();
-                $product->setCreatedAt(new DateTime());
-                $product->setEnabled(false);
-                $product->setSlug(rand(2,100));
-                
-                $em->persist($product);
-                $em->flush();
+            //Géneration et verification du slug
+            $rawSlug = $product->getName();
+            $slugNumber = count($productRepository->findSlug($slugify->slugify($rawSlug)));
+            $slug = $slugify->slugify($rawSlug . $slugNumber);
+            
+            $product->setCreatedAt(new DateTime());
+            $product->setEnabled(false);
+            $product->setSlug($slug);
 
-                return $this->redirectToRoute("index_product",[
-                    'data'=>$productRepository->findAll()
-                ]);
-                }
-       
-        return $this->render('pili_pili/product-create.html.twig',[
-            'form'=>$form->createView()
+            $em->persist($product);
+            $em->flush();
+
+            $this->addFlash('success', 'Produit Ajouté');
+
+            return $this->redirectToRoute("index_product");
+        }
+
+        return $this->render('pili_pili/product-create.html.twig', [
+            'form' => $form->createView()
         ]);
     }
 }
