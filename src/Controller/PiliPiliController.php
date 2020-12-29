@@ -189,4 +189,14 @@ class PiliPiliController extends AbstractController
             'form' => $form->createView()
         ]);
     }
+
+    /**
+     * @Route("/cookie", name="cookie")
+     *
+     * @return Response
+     */
+    public function cookie():Response
+    {
+        return $this->render('pili_pili/cookie.html.twig');
+    }
 }
