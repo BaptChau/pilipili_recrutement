@@ -1,8 +1,11 @@
 <?php
 namespace App\Command;
 
+use Symfony\Component\Mime\Email;
+use App\Controller\MailerController;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -12,11 +15,13 @@ class EnableCommand extends Command
     protected static $defaultName = "product:enabled";
     protected $product;
     protected $em;
+    protected $mailer;
 
-    public function __construct(ProductRepository $productRepository, EntityManagerInterface $entityManagerInterface)
+    public function __construct(ProductRepository $productRepository, EntityManagerInterface $entityManagerInterface,MailerInterface $mailerInterface)
     {
         $this->product = $productRepository->findBy(['enabled'=>false]);
         $this->em = $entityManagerInterface;
+        $this->mailer = $mailerInterface;
 
         parent::__construct();
     }
@@ -28,6 +33,8 @@ class EnableCommand extends Command
             $this->em->persist($value);
             $this->em->flush();
         }
+
+        
 
         
 

@@ -103,7 +103,7 @@ class PiliPiliController extends AbstractController
             $rawSlug = $product->getName();
             $slugNumber = count($productRepository->findSlug($slugify->slugify($rawSlug)));
             $slug = $slugify->slugify($rawSlug . $slugNumber);
-            
+
             $product->setCreatedAt(new DateTime());
             $product->setEnabled(false);
             $product->setSlug($slug);
@@ -112,6 +112,7 @@ class PiliPiliController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Produit Ajouté');
+            $this->addFlash('success', 'Pour activer les produits : php bin/console product:enable ');
 
             return $this->redirectToRoute("index_product");
         }
@@ -126,10 +127,10 @@ class PiliPiliController extends AbstractController
      *
      * @return Response
      */
-    public function updateProduct(int $id,ProductRepository $productRepository, Request $request, BrandRepository $brandRepository, EntityManagerInterface $em):Response
+    public function updateProduct(int $id, ProductRepository $productRepository, Request $request, BrandRepository $brandRepository, EntityManagerInterface $em): Response
     {
         $brand = $brandRepository->findAll();
-        $product = $productRepository->findOneBy(['id'=>$id]);
+        $product = $productRepository->findOneBy(['id' => $id]);
         dump($product);
 
         $form = $this->createFormBuilder($product)
@@ -170,7 +171,7 @@ class PiliPiliController extends AbstractController
             ->getForm();
 
 
-            $form->handleRequest($request);
+        $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $product = $form->getData();
 
@@ -183,12 +184,9 @@ class PiliPiliController extends AbstractController
             $this->addFlash('success', 'Produit Modifié');
 
             return $this->redirectToRoute("index_product");
-
-           
-            
         }
-        return $this->render('pili_pili/product-update.html.twig',[
-            'form'=>$form->createView()
-            ]);
-}
+        return $this->render('pili_pili/product-update.html.twig', [
+            'form' => $form->createView()
+        ]);
+    }
 }
