@@ -120,4 +120,75 @@ class PiliPiliController extends AbstractController
             'form' => $form->createView()
         ]);
     }
+
+    /**
+     * @Route("/product/update/{id}", name="update_product")
+     *
+     * @return Response
+     */
+    public function updateProduct(int $id,ProductRepository $productRepository, Request $request, BrandRepository $brandRepository, EntityManagerInterface $em):Response
+    {
+        $brand = $brandRepository->findAll();
+        $product = $productRepository->findOneBy(['id'=>$id]);
+        dump($product);
+
+        $form = $this->createFormBuilder($product)
+            ->add('name', TextType::class, [
+                'label' => "Name",
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('description', TextareaType::class, [
+                'label' => 'Description',
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('brand_id', ChoiceType::class, [
+                'choices' => $brand,
+                'choice_label' => function (?Brand $bra) {
+                    return $bra ? $bra->getName() : '';
+                },
+                'label' => 'Brand',
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('price', NumberType::class, [
+                'label' => 'Price',
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => [
+                    'class' => 'btn btn-primary'
+                ]
+            ])
+            ->getForm();
+
+
+            $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $product = $form->getData();
+
+            $product->setUpdatedAt(new DateTime());
+            $product->setEnabled(false);
+
+            $em->persist($product);
+            $em->flush();
+
+            $this->addFlash('success', 'Produit Modifié');
+
+            return $this->redirectToRoute("index_product");
+
+           
+            
+        }
+        return $this->render('pili_pili/product-update.html.twig',[
+            'form'=>$form->createView()
+            ]);
+}
 }
